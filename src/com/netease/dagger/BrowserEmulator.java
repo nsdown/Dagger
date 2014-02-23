@@ -41,6 +41,7 @@ import com.thoughtworks.selenium.Wait;
 
 /**
  * BrowserEmulator is based on Selenium2 and adds some enhancements
+ * 
  * @author ChenKan
  */
 public class BrowserEmulator {
@@ -49,10 +50,10 @@ public class BrowserEmulator {
 	WebDriverBackedSelenium browser;
 	ChromeDriverService chromeServer;
 	JavascriptExecutor javaScriptExecutor;
-	
+
 	int stepInterval = Integer.parseInt(GlobalSettings.stepInterval);
 	int timeout = Integer.parseInt(GlobalSettings.timeout);
-	
+
 	private static Logger logger = Logger.getLogger(BrowserEmulator.class.getName());
 
 	public BrowserEmulator() {
@@ -69,7 +70,8 @@ public class BrowserEmulator {
 			return;
 		}
 		if (type == 2) {
-			chromeServer = new ChromeDriverService.Builder().usingDriverExecutable(new File(GlobalSettings.chromeDriverPath)).usingAnyFreePort().build();
+			chromeServer = new ChromeDriverService.Builder().usingDriverExecutable(new File(GlobalSettings.chromeDriverPath)).usingAnyFreePort()
+					.build();
 			try {
 				chromeServer.start();
 			} catch (IOException e) {
@@ -97,9 +99,10 @@ public class BrowserEmulator {
 
 		Assert.fail("Incorrect browser type");
 	}
-	
+
 	/**
 	 * Get the WebDriver instance embedded in BrowserEmulator
+	 * 
 	 * @return a WebDriver instance
 	 */
 	public RemoteWebDriver getBrowserCore() {
@@ -108,14 +111,16 @@ public class BrowserEmulator {
 
 	/**
 	 * Get the WebDriverBackedSelenium instance embedded in BrowserEmulator
+	 * 
 	 * @return a WebDriverBackedSelenium instance
 	 */
 	public WebDriverBackedSelenium getBrowser() {
 		return browser;
 	}
-	
+
 	/**
 	 * Get the JavascriptExecutor instance embedded in BrowserEmulator
+	 * 
 	 * @return a JavascriptExecutor instance
 	 */
 	public JavascriptExecutor getJavaScriptExecutor() {
@@ -124,6 +129,7 @@ public class BrowserEmulator {
 
 	/**
 	 * Open the URL
+	 * 
 	 * @param url
 	 *            the target URL
 	 */
@@ -152,6 +158,7 @@ public class BrowserEmulator {
 
 	/**
 	 * Click the page element
+	 * 
 	 * @param xpath
 	 *            the element's xpath
 	 */
@@ -169,9 +176,11 @@ public class BrowserEmulator {
 
 	/**
 	 * Click an element until it's clickable or timeout
+	 * 
 	 * @param xpath
 	 * @param startTime
-	 * @param timeout in millisecond
+	 * @param timeout
+	 *            in millisecond
 	 * @throws Exception
 	 */
 	private void clickTheClickable(String xpath, long startTime, int timeout) throws Exception {
@@ -192,6 +201,7 @@ public class BrowserEmulator {
 	/**
 	 * Type text at the page element<br>
 	 * Before typing, try to clear existed text
+	 * 
 	 * @param xpath
 	 *            the element's xpath
 	 * @param text
@@ -253,8 +263,7 @@ public class BrowserEmulator {
 
 		// Firefox and IE require multiple cycles, more than twice, to cause a
 		// hovering effect
-		if (GlobalSettings.browserCoreType == 1
-				|| GlobalSettings.browserCoreType == 3) {
+		if (GlobalSettings.browserCoreType == 1 || GlobalSettings.browserCoreType == 3) {
 			for (int i = 0; i < 5; i++) {
 				Actions builder = new Actions(browserCore);
 				builder.moveToElement(we).build().perform();
@@ -272,6 +281,7 @@ public class BrowserEmulator {
 
 	/**
 	 * Switch window/tab
+	 * 
 	 * @param windowTitle
 	 *            the window/tab's title
 	 */
@@ -283,6 +293,7 @@ public class BrowserEmulator {
 
 	/**
 	 * Enter the iframe
+	 * 
 	 * @param xpath
 	 *            the iframe's xpath
 	 */
@@ -300,7 +311,7 @@ public class BrowserEmulator {
 		browserCore.switchTo().defaultContent();
 		logger.info("Left the iframe");
 	}
-	
+
 	/**
 	 * Refresh the browser
 	 */
@@ -309,9 +320,10 @@ public class BrowserEmulator {
 		browserCore.navigate().refresh();
 		logger.info("Refreshed");
 	}
-	
+
 	/**
 	 * Mimic system-level keyboard event
+	 * 
 	 * @param keyCode
 	 *            such as KeyEvent.VK_TAB, KeyEvent.VK_F11
 	 */
@@ -323,18 +335,39 @@ public class BrowserEmulator {
 		} catch (AWTException e) {
 			e.printStackTrace();
 		}
-		rb.keyPress(keyCode);	// press key
-		rb.delay(100); 			// delay 100ms
-		rb.keyRelease(keyCode);	// release key
+		rb.keyPress(keyCode); // press key
+		rb.delay(100); // delay 100ms
+		rb.keyRelease(keyCode); // release key
 		logger.info("Pressed key with code " + keyCode);
 	}
 
-	//TODO Mimic system-level mouse event
+	// TODO unavailable for space
+	/**
+	 * Mimic system-level keyboard event with String
+	 * 
+	 * @param text
+	 * 
+	 */
+	public void inputKeyboard(String text) {
+		String cmd = System.getProperty("user.dir") + "\\res\\SeleniumCommand.exe" + " sendKeys " + text;
+
+		Process p = null;
+		try {
+			p = Runtime.getRuntime().exec(cmd);
+			p.waitFor();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			p.destroy();
+		}
+		logger.info("Pressed key with string " + text);
+	}
 
 	/**
 	 * Expect some text exist or not on the page<br>
 	 * Expect text exist, but not found after timeout => Assert fail<br>
 	 * Expect text not exist, but found after timeout => Assert fail
+	 * 
 	 * @param expectExist
 	 *            true or false
 	 * @param text
@@ -369,6 +402,7 @@ public class BrowserEmulator {
 	 * Expect element exist, but not found after timeout => Assert fail<br>
 	 * Expect element not exist, but found after timeout => Assert fail<br>
 	 * Here <b>exist</b> means <b>visible</b>
+	 * 
 	 * @param expectExist
 	 *            true or false
 	 * @param xpath
@@ -400,9 +434,10 @@ public class BrowserEmulator {
 
 	/**
 	 * Is the text present on the page
+	 * 
 	 * @param text
 	 *            the expected text
-	 * @param time           
+	 * @param time
 	 *            wait a moment (in millisecond) before search text on page;<br>
 	 *            minus time means search text at once
 	 * @return
@@ -422,9 +457,10 @@ public class BrowserEmulator {
 	/**
 	 * Is the element present on the page<br>
 	 * Here <b>present</b> means <b>visible</b>
+	 * 
 	 * @param xpath
 	 *            the expected element's xpath
-	 * @param time           
+	 * @param time
 	 *            wait a moment (in millisecond) before search element on page;<br>
 	 *            minus time means search element at once
 	 * @return
@@ -440,10 +476,12 @@ public class BrowserEmulator {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Pause
-	 * @param time in millisecond
+	 * 
+	 * @param time
+	 *            in millisecond
 	 */
 	public void pause(int time) {
 		if (time <= 0) {
@@ -456,7 +494,7 @@ public class BrowserEmulator {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void handleFailure(String notice) {
 		String png = LogTools.screenShot(this);
 		String log = notice + " >> capture screenshot at " + png;
@@ -467,19 +505,21 @@ public class BrowserEmulator {
 		Reporter.log(log + "<br/><img src=\"" + GlobalSettings.baseStorageUrl + "/" + png + "\" />");
 		Assert.fail(log);
 	}
-	
+
 	/**
 	 * Return text from specified web element.
+	 * 
 	 * @param xpath
 	 * @return
 	 */
 	public String getText(String xpath) {
-		WebElement element = this.getBrowserCore().findElement(By.xpath(xpath)); 
+		WebElement element = this.getBrowserCore().findElement(By.xpath(xpath));
 		return element.getText();
 	}
-	
+
 	/**
 	 * Select an option by visible text from &lt;select&gt; web element.
+	 * 
 	 * @param xpath
 	 * @param option
 	 */
